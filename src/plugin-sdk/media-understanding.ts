@@ -13,12 +13,14 @@ export type {
   VideoDescriptionResult,
 } from "../media-understanding/types.js";
 
-export { describeImageWithModel, describeImagesWithModel } from "../media-understanding/providers/image.js";
-export { transcribeOpenAiCompatibleAudio } from "../media-understanding/providers/openai-compatible-audio.js";
 export {
-  assertOkOrThrowHttpError,
-  normalizeBaseUrl,
-  postJsonRequest,
-  postTranscriptionRequest,
-  requireTranscriptionText,
-} from "../media-understanding/providers/shared.js";
+  describeImageWithModel,
+  describeImagesWithModel,
+} from "../media-understanding/image-runtime.js";
+export {
+  buildOpenAiCompatibleVideoRequestBody,
+  coerceOpenAiCompatibleVideoText,
+  resolveMediaUnderstandingString,
+  type OpenAiCompatibleVideoPayload,
+} from "../media-understanding/openai-compatible-video.ts";
+export { transcribeOpenAiCompatibleAudio } from "../media-understanding/openai-compatible-audio.js";
