@@ -45,6 +45,20 @@ function serializeAdaptiveCardActionValue(value: unknown): string | null {
   if (value === undefined) {
     return null;
   }
+  // Action.Execute payload: extract verb or data.value
+  if (value !== null && typeof value === "object") {
+    const v = value as Record<string, unknown>;
+    if (typeof v.verb === "string" && v.verb.trim()) {
+      return v.verb.trim();
+    }
+    const data = v.data as Record<string, unknown> | undefined;
+    if (typeof data?.value === "string") {
+      const dv = (data.value as string).trim();
+      if (dv) {
+        return dv;
+      }
+    }
+  }
   try {
     return JSON.stringify(value);
   } catch {
@@ -348,6 +362,11 @@ export function registerMSTeamsHandlers<T extends MSTeamsActivityHandler>(
       }
 
       if (ctx.activity?.type === "invoke" && ctx.activity?.name === "adaptiveCard/action") {
+        // Must acknowledge the invoke immediately or Teams won't fire it
+        await ctx.sendActivity({
+          type: "invokeResponse",
+          value: { status: 200, body: {} },
+        });
         const text = serializeAdaptiveCardActionValue(ctx.activity?.value);
         if (text) {
           await handleTeamsMessage({
