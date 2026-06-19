@@ -1,0 +1,33 @@
+{
+  "id": "voice-reply",
+  "activation": {
+    "onStartup": true
+  },
+  "uiHints": {
+    "enabled": { "label": "Enable Voice Reply Endpoint" },
+    "serve.port": { "label": "HTTP Port" },
+    "serve.bind": { "label": "HTTP Bind" },
+    "serve.path": { "label": "HTTP Path" },
+    "sessionScope": {
+      "label": "Session Scope",
+      "help": "per-phone keeps a caller's memory across calls; per-call starts fresh each call."
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "enabled": { "type": "boolean" },
+      "serve": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "port": { "type": "integer", "minimum": 1 },
+          "bind": { "type": "string" },
+          "path": { "type": "string" }
+        }
+      },
+      "sessionScope": { "type": "string", "enum": ["per-phone", "per-call"] }
+    }
+  }
+}

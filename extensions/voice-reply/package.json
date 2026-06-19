@@ -1,0 +1,29 @@
+{
+  "name": "@openclaw/voice-reply",
+  "version": "2026.5.26",
+  "description": "Synchronous HTTP reply endpoint for the Twilio voice router (spokenText + server-held context)",
+  "type": "module",
+  "dependencies": {
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@openclaw/plugin-sdk": "workspace:*",
+    "openclaw": "workspace:*"
+  },
+  "peerDependencies": {
+    "openclaw": ">=2026.5.26"
+  },
+  "peerDependenciesMeta": {
+    "openclaw": {
+      "optional": true
+    }
+  },
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ],
+    "compat": {
+      "pluginApi": ">=2026.5.26"
+    }
+  }
+}
