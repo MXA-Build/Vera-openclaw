@@ -6,3 +6,4 @@ export { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
 export type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
 export { getReplyFromConfig } from "openclaw/plugin-sdk/reply-runtime";
 export { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+export { stripMarkdown } from "openclaw/plugin-sdk/text-runtime";

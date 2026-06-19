@@ -1,5 +1,6 @@
 import { getReplyFromConfig } from "../runtime-api.js";
 import type { ReplyHandler } from "./http-server.js";
+import { toSpokenText } from "./spoken-text.js";
 
 type Logger = {
   info: (message: string) => void;
@@ -34,9 +35,9 @@ export function createReplyHandler(deps: { logger: Logger }): ReplyHandler {
       if (!replyText) {
         return { error: "empty reply from persona", status: 502 };
       }
-      // Phase 1: spokenText omitted (server returns spokenText = text). Phase 2
-      // adds the no-audio prep (stripMarkdown + [[tts:]]).
-      return { text: replyText };
+      // Phase 2: spokenText is the no-audio speech-shaped text (markdown stripped,
+      // links/emoji/slashes handled); Polly voices this, text is the raw markdown.
+      return { text: replyText, spokenText: toSpokenText(replyText) };
     } catch (err) {
       deps.logger.error(`[voice-reply] getReplyFromConfig failed: ${String(err)}`);
       return { error: "reply generation failed", status: 502 };
