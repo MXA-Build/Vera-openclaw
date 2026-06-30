@@ -1,12 +1,14 @@
+// Memory Wiki plugin module implements status behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
 import { listActiveMemoryPublicArtifacts } from "openclaw/plugin-sdk/memory-host-core";
+import { pathExists } from "openclaw/plugin-sdk/security-runtime";
 import type { OpenClawConfig } from "../api.js";
 import type { ResolvedMemoryWikiConfig } from "./config.js";
 import { inferWikiPageKind, toWikiPageSummary, type WikiPageKind } from "./markdown.js";
 import { probeObsidianCli } from "./obsidian.js";
 
-export type MemoryWikiStatusWarning = {
+type MemoryWikiStatusWarning = {
   code:
     | "vault-missing"
     | "obsidian-cli-missing"
@@ -46,7 +48,7 @@ export type MemoryWikiStatus = {
   warnings: MemoryWikiStatusWarning[];
 };
 
-export type MemoryWikiDoctorFix = {
+type MemoryWikiDoctorFix = {
   code: MemoryWikiStatusWarning["code"];
   message: string;
 };
@@ -64,15 +66,6 @@ type ResolveMemoryWikiStatusDeps = {
   listPublicArtifacts?: typeof listActiveMemoryPublicArtifacts;
   resolveCommand?: (command: string) => Promise<string | null>;
 };
-
-async function pathExists(inputPath: string): Promise<boolean> {
-  try {
-    await fs.access(inputPath);
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 async function collectVaultCounts(vaultPath: string): Promise<{
   pageCounts: Record<WikiPageKind, number>;
@@ -94,26 +87,28 @@ async function collectVaultCounts(vaultPath: string): Promise<{
   };
   const dirs = ["entities", "concepts", "sources", "syntheses", "reports"] as const;
   for (const dir of dirs) {
+    const dirPath = path.join(vaultPath, dir);
     const entries = await fs
-      .readdir(path.join(vaultPath, dir), { withFileTypes: true })
+      .readdir(dirPath, { withFileTypes: true, recursive: true })
       .catch(() => []);
     for (const entry of entries) {
       if (!entry.isFile() || !entry.name.endsWith(".md") || entry.name === "index.md") {
         continue;
       }
-      const kind = inferWikiPageKind(path.join(dir, entry.name));
+      const absolutePath = path.join(entry.parentPath ?? dirPath, entry.name);
+      const relativeToVault = path.relative(vaultPath, absolutePath).split(path.sep).join("/");
+      const kind = inferWikiPageKind(relativeToVault);
       if (kind) {
         pageCounts[kind] += 1;
       }
       if (dir === "sources") {
-        const absolutePath = path.join(vaultPath, dir, entry.name);
         const raw = await fs.readFile(absolutePath, "utf8").catch(() => null);
         if (!raw) {
           continue;
         }
         const page = toWikiPageSummary({
           absolutePath,
-          relativePath: path.join(dir, entry.name),
+          relativePath: relativeToVault,
           raw,
         });
         if (!page) {
